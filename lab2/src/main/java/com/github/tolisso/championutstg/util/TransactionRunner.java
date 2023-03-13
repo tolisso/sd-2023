@@ -11,9 +11,4 @@ public class TransactionRunner {
     public void doInTransaction(Runnable r) {
         r.run();
     }
-
-    @Transactional
-    public <T> T doInTransaction(Supplier<T> r) {
-        return r.get();
-    }
 }

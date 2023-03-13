@@ -2,17 +2,11 @@ package com.tolisso.lab1.actor;
 
 import akka.actor.UntypedActor;
 import com.tolisso.lab1.actor.exception.EscalateException;
-import com.tolisso.lab1.actor.exception.RestartException;
-import com.tolisso.lab1.actor.exception.StopException;
 import com.tolisso.lab1.dto.RequestDto;
 import com.tolisso.lab1.feign.Api;
-import feign.Request;
-import lombok.val;
 import scala.Option;
 
 import java.util.List;
-
-import static akka.actor.TypedActor.self;
 
 public class ChildActor extends UntypedActor {
 

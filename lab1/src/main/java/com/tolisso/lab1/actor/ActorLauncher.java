@@ -6,6 +6,7 @@ import akka.actor.Props;
 import com.tolisso.lab1.dto.RequestDto;
 import com.tolisso.lab1.dto.Result;
 import com.tolisso.lab1.exception.ActorException;
+import com.tolisso.lab1.feign.Api;
 import com.tolisso.lab1.feign.Api1;
 import com.tolisso.lab1.feign.Api2;
 import com.tolisso.lab1.feign.Api3;
@@ -30,41 +31,21 @@ public class ActorLauncher {
     private final Api2 api2;
     private final Api3 api3;
 
-    private static class DoNothingFuture extends RecursiveAction {
-
-        @Override
-        protected void compute() {
-        }
-    }
-
-    public List<RequestDto> f() {
+    public List<RequestDto> getTopRequests() {
         ActorSystem system = ActorSystem.create("MySystem");
-        val jobDoneFuture = new DoNothingFuture();
-        val result = new Result<>(new ArrayList<RequestDto>());
-
+        val result = new Result<List<RequestDto>>();
+        List<Api> apis = List.of(api1, api2, api3);
         ActorRef parent = system.actorOf(
-                Props.create(MasterActor.class, api1, api2, api3, jobDoneFuture, result), "parent");
+                Props.create(MasterActor.class, apis, result), "parent");
 
         parent.tell("get", ActorRef.noSender());
 
         try {
-            jobDoneFuture.get(500, TimeUnit.MILLISECONDS);
+            return result.get(500, TimeUnit.MILLISECONDS);
         } catch (TimeoutException | ExecutionException | InterruptedException e) {
             throw new ActorException(e);
         } finally {
             system.stop(parent);
         }
-        return getTopRequests(result.getRes());
-    }
-
-    public List<RequestDto> getTopRequests(List<RequestDto> rawResults) {
-        Map<String, Integer> requestToNumberOfSearches = rawResults.stream()
-                .collect(Collectors.toMap(RequestDto::getRequest, RequestDto::getNumOfSearches, Integer::sum));
-
-        return requestToNumberOfSearches.entrySet().stream()
-                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .limit(5)
-                .map(entry -> new RequestDto(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList());
     }
 }

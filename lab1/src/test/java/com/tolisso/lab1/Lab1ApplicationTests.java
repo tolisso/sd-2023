@@ -69,7 +69,7 @@ class Lab1ApplicationTests {
         stub("/api1", response1, 0);
         stub("/api2", response2, 0);
         stub("/api3", response3, 0);
-        List<RequestDto> result = actorLauncher.f();
+        List<RequestDto> result = actorLauncher.getTopRequests();
 
         assertEquals(15 + 10 + 10, result.get(0).getNumOfSearches());
         assertEquals(14 + 10 + 10, result.get(1).getNumOfSearches());
@@ -90,6 +90,6 @@ class Lab1ApplicationTests {
         stub("/api2", response2, 1000);
         stub("/api3", response3, 1000);
 
-        assertThrows(ActorException.class, () -> actorLauncher.f());
+        assertThrows(ActorException.class, () -> actorLauncher.getTopRequests());
     }
 }
